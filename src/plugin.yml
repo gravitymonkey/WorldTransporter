@@ -1,0 +1,29 @@
+name: WorldTransporter
+main: com.gravitymonkey.minecraft.bukkit.worldtransporter.WorldTransporter
+version: 0.1
+commands:
+  wtcreate:
+    description: Create a new world
+    usage: /<command> [name] <environment> <seed>
+  wtlist:
+    description: List worlds
+    usage: /<command>    
+  goto:
+    description: Transport to worlds
+    usage: /<command> [name]  
+  wtdelete:
+    description: Delete world
+    usage: <command> [name]      
+permissions:
+    WorldTransporter.wtcreate:
+        description: Create a world
+        default: false
+    WorldTransporter.wtdelete:
+        description: Delete a world
+        default: false
+    WorldTransporter.goto:
+        description: Transport yourself to another world
+        default: true
+    WorldTransporter.wtlist:
+        description: Show a list of worlds now running
+        default: true
