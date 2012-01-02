@@ -2,6 +2,7 @@ package com.gravitymonkey.minecraft.bukkit.worldtransporter;
 
 
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
@@ -12,6 +13,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class WorldTransporter extends JavaPlugin
@@ -25,6 +27,7 @@ public class WorldTransporter extends JavaPlugin
 	this.reloadConfig();
     this.logInfo("Enabled!");
 
+    this.reloadConfig();
 
     this.logInfo("number of worlds " + this.getConfig().getInt("numberOfWorlds"));
     
@@ -35,9 +38,27 @@ public class WorldTransporter extends JavaPlugin
     } else {
     	this.logInfo("reading setup from config.yml");
     	this.logInfo("I have " + this.getConfig().getInt("numberOfWorlds") + " worlds in config");
+        loadWorlds();
     }
-    this.reloadConfig();
-    loadWorlds();
+//    this.reloadConfig();
+  }
+  
+  public boolean isWorldVisible(String name){
+	  this.logInfo("isWorldVisible gets " + name);
+	  int x= this.getConfig().getInt("numberOfWorlds");
+	  for (int w = 0; w < x; w++){
+		  String n = (String)this.getConfig().get("worlds.world_" + w + ".name");
+		  this.logInfo(w + ":" + name + " - " + n);
+		  if (n.trim().toLowerCase().equals(name.toLowerCase().trim())){
+			  String b = (String)this.getConfig().get("worlds.world_" + w + ".visible");
+			  if (b != null){
+				  if (b.toLowerCase().equals("true")){
+					  return true;
+				  }
+			  }
+		  }
+	  }
+	  return false;
   }
   
   private void buildConfigFromServer(){
@@ -47,6 +68,7 @@ public class WorldTransporter extends JavaPlugin
 		this.getConfig().set("worlds.world_" + w + ".name", null);
 		this.getConfig().set("worlds.world_" + w + ".environment", null);
 		this.getConfig().set("worlds.world_" + w + ".seed", null);
+		this.getConfig().set("worlds.world_" + w + ".visible", null);
 		this.getConfig().set("worlds.world_" + w, null);
 	}
 	
@@ -59,6 +81,11 @@ public class WorldTransporter extends JavaPlugin
        long seed = (((World)worlds.get(w)).getSeed());
        this.getConfig().set("worlds.world_" + w + ".name", name);
        this.getConfig().set("worlds.world_" + w + ".environment", environment);
+       if (environment.toUpperCase().equals("NORMAL")){
+    	   this.getConfig().set("worlds.world_" + w + ".visible", "true");
+       } else {
+    	   this.getConfig().set("worlds.world_" + w + ".visible", "false");    	   
+       }
        this.getConfig().set("worlds.world_" + w + ".seed", seed);
        this.logInfo("found " + name + "  " + environment + "  " + seed);
      }
@@ -148,30 +175,31 @@ public class WorldTransporter extends JavaPlugin
 
     if (hasPerm(player, label.toLowerCase())){
       if (label.equalsIgnoreCase("wtcreate")){
-    	  this.logInfo("create");
-        new Create(player, args, this);        
+    	new Create(player, args, this);        
       } else if (label.equalsIgnoreCase("wtlist")){
-      	  this.logInfo("list");
-          new ListWorlds(player, this);
+      	  new ListWorlds(player, this);
       } else if (label.equalsIgnoreCase("goto")){
-      	  this.logInfo("goto");
-          new Transport(player, args, this);
+      	  new Transport(player, args, this);
       }
+    } else {
+		player.sendMessage(ChatColor.DARK_RED + "You don't have permission to " + label);				    						    					
     }
     return true;
   }
 
   private boolean hasPerm(Player player, String node)
   {
-	  
-	  if (node.equals("wtcreate")){
-		  if (player.isOp()){
+
+	  if (player.isOp()){
+		  return true;
+	  } else {
+		  Permission p = new Permission("worldtransporter." + node);
+		  if (player.hasPermission(p)) {
 			  return true;
 		  }
-		  return false;
 	  }
 
-	  return true;
+	  return false;
   }
 
   
@@ -183,8 +211,12 @@ public class WorldTransporter extends JavaPlugin
 			String name = this.getConfig().getString("worlds.world_" + w + ".name");
 			if (name != null){
 		        WorldCreator creator = new WorldCreator(name);
-		        this.getServer().createWorld(creator);
-		        this.logInfo("Loaded world " + name);
+		        World ww = this.getServer().createWorld(creator);
+		        if (ww != null){
+//		        	ww.setDifficulty(arg0)
+//		        	ww.setPVP();
+		        	this.logInfo("Loaded world " + name);
+		        }
 		        counter++;
 			} else {
 				break;

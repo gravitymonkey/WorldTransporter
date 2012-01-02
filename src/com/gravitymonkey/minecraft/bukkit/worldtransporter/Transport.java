@@ -35,10 +35,15 @@ public class Transport {
 		      p.sendMessage(ChatColor.DARK_RED + "You can't travel with items.");
 		      p.sendMessage(ChatColor.DARK_RED + "Please store your stuff in a chest.");
 			} else {
-	          Location loc = wx.getSpawnLocation();
-	          p.teleport(loc);
-	          i.clear();
-	          p.sendMessage(ChatColor.DARK_RED + "TRANSPORTED: " + ChatColor.GRAY + "Welcome to " + args[0]);
+				if (wt.isWorldVisible(name)){
+		          Location loc = wx.getSpawnLocation();
+		          p.teleport(loc);
+		          i.clear();
+		          p.sendMessage(ChatColor.DARK_RED + "TRANSPORTED: " + ChatColor.GRAY + "Welcome to " + args[0]);
+				} else {
+					 p.sendMessage(ChatColor.DARK_RED + "> " + ChatColor.GRAY + "No transport to " + args[0]);
+					 p.sendMessage(ChatColor.DARK_RED + "> " + ChatColor.GRAY + " type /wtlist to list worlds");			
+				}
 			}
 			
 		} else {

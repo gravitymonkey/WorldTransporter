@@ -23,7 +23,7 @@ permissions:
         default: false
     WorldTransporter.goto:
         description: Transport yourself to another world
-        default: true
+        default: false
     WorldTransporter.wtlist:
         description: Show a list of worlds now running
-        default: true
+        default: false
